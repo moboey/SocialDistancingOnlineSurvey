@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "survey",
+  "type": "object",
+  "properties": {
+    "option": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "option"
+  ],
+  "additionalProperties": false
+}
