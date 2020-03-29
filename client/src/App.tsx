@@ -41,7 +41,8 @@ export default class App extends Component<AppProps, AppState> {
             <Grid.Row>
               <Grid.Column width={16}>
                 <Router history={this.props.history}>
-                  {this.generateMenu()}
+                  {//this.generateMenu()
+                  }
 
                   {this.generateCurrentPage()}
                 </Router>
@@ -86,9 +87,9 @@ export default class App extends Component<AppProps, AppState> {
         <Route
           path="/"
           exact
-          /*render={props => {
+          render={props => {
             return <Todos {...props} auth={this.props.auth} />
-          }}*/
+          }}
         />
         
         <Route

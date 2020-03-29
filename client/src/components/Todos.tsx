@@ -16,7 +16,7 @@ import {
 
 import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
 import Auth from '../auth/Auth'
-import { Todo } from '../types/Todo'
+import { SurveyResult } from '../types/Todo'
 
 interface TodosProps {
   auth: Auth
@@ -24,16 +24,16 @@ interface TodosProps {
 }
 
 interface TodosState {
-  todos: Todo[]
+  todos: SurveyResult
   newTodoName: string
-  loadingTodos: boolean
+  loadingSurvey: boolean
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
-    todos: [],
+    todos: {yes:'0',no:'0',maybe:'0'},
     newTodoName: '',
-    loadingTodos: true
+    loadingSurvey: true
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +45,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
-    console.log('create Todo')
+    console.log('update Survey')
     try {
       const dueDate = this.calculateDueDate()
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
@@ -54,8 +54,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       })
       console.log('created Todo:'+newTodo)
       this.setState({
-        todos: [...this.state.todos, newTodo],
-        newTodoName: ''
+        //todos: [...this.state.todos, newTodo],
+        //newTodoName: ''
       })
     } catch(e) {
       alert('Todo creation failed :'+e)
@@ -66,7 +66,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     try {
       await deleteTodo(this.props.auth.getIdToken(), todoId)
       this.setState({
-        todos: this.state.todos.filter(todo => todo.todoId != todoId)
+        //todos: this.state.todos.filter(todo => todo.todoId != todoId)
       })
     } catch {
       alert('Todo deletion failed')
@@ -75,7 +75,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   onTodoCheck = async (pos: number) => {
     try {
-      const todo = this.state.todos[pos]
+      /*const todo = this.state.todos[pos]
       await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
         name: todo.name,
         dueDate: todo.dueDate,
@@ -85,7 +85,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         todos: update(this.state.todos, {
           [pos]: { done: { $set: !todo.done } }
         })
-      })
+      })*/
     } catch {
       alert('Todo update failed')
     }
@@ -93,116 +93,98 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   async componentDidMount() {
     try {
-      const todos = await getTodos(this.props.auth.getIdToken())
+      const todos = await getTodos()
       this.setState({
         todos,
-        loadingTodos: false
+        loadingSurvey: false
       })
     } catch (e) {
-      alert(`Failed to fetch todos: ${e.message}`)
+      alert(`Failed to fetch survey result: ${e.message}`)
     }
   }
 
   render() {
     return (
       <div>
-        <Header as="h1">TODOs</Header>
+        <Header as="h1">Can social distancing flatten the curve?</Header>
 
-        {this.renderCreateTodoInput()}
+        {this.renderSurveyInput()}
 
         {this.renderTodos()}
       </div>
     )
   }
 
-  renderCreateTodoInput() {
+  renderSurveyInput() {
     return (
+      <Grid padded>
       <Grid.Row>
-        <Grid.Column width={16}>
-          <Input
-            action={{
-              color: 'teal',
-              labelPosition: 'left',
-              icon: 'add',
-              content: 'New task',
-              onClick: this.onTodoCreate
-            }}
-            fluid
-            actionPosition="left"
-            placeholder="To change the world..."
-            onChange={this.handleNameChange}
-          />
-        </Grid.Column>
+       
+        <Button          
+          size="large"          
+          color="teal"   block
+          onClick={() => this.onTodoCreate}
+                >Yes   
+                  </Button>  
+            
+        <Button            
+          size="large"                 
+          color="yellow"   block
+          onClick={() => this.onTodoCreate}
+                >Maybe   
+                  </Button> 
+        <Button            
+          size="large"                 
+          color="red"   block
+          onClick={() => this.onTodoCreate}
+                >No
+                  </Button>     
         <Grid.Column width={16}>
           <Divider />
         </Grid.Column>
       </Grid.Row>
+      </Grid>
     )
   }
 
   renderTodos() {
-    if (this.state.loadingTodos) {
+    if (this.state.loadingSurvey) {
       return this.renderLoading()
     }
 
-    return this.renderTodosList()
+    return this.renderSurveyResult()
   }
 
   renderLoading() {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading Survey Result
         </Loader>
       </Grid.Row>
     )
   }
 
-  renderTodosList() {
+  renderSurveyResult() {
     return (
       <Grid padded>
-        {this.state.todos.map((todo, pos) => {
-          return (
-            <Grid.Row key={todo.todoId}>
-              <Grid.Column width={1} verticalAlign="middle">
-                <Checkbox
-                  onChange={() => this.onTodoCheck(pos)}
-                  checked={todo.done}
-                />
-              </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
-                {todo.name}
+       
+            <Grid.Row>             
+              <Grid.Column width={3} floated="right">
+                Yes : {this.state.todos.yes}
               </Grid.Column>
               <Grid.Column width={3} floated="right">
-                {todo.dueDate}
+                No : {this.state.todos.no}
               </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="blue"
-                  onClick={() => this.onEditButtonClick(todo.todoId)}
-                >
-                  <Icon name="pencil" />
-                </Button>
+              <Grid.Column width={3} floated="right">
+                Maybe : {this.state.todos.maybe}
               </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="red"
-                  onClick={() => this.onTodoDelete(todo.todoId)}
-                >
-                  <Icon name="delete" />
-                </Button>
-              </Grid.Column>
-              {todo.attachmentUrl && (
-                <Image src={todo.attachmentUrl} size="small" wrapped />
-              )}
+              
               <Grid.Column width={16}>
                 <Divider />
               </Grid.Column>
             </Grid.Row>
-          )
-        })}
+        
       </Grid>
     )
   }

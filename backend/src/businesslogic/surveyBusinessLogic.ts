@@ -10,3 +10,7 @@ export async function getSurveyResult(): Promise<SurveyResult> {
     return surveyAccess.getSurveyResult()
 }
  
+export async function updateSurvey(surveyId : string): Promise<SurveyResult> {
+    logger.info('Updating survey')
+    return surveyAccess.updateSurvey(surveyId)
+}

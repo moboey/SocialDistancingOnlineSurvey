@@ -1,30 +1,28 @@
 import { apiEndpoint } from '../config'
-import { Todo } from '../types/Todo';
+import { SurveyResult } from '../types/Todo';
 import { CreateTodoRequest } from '../types/CreateTodoRequest';
 import Axios from 'axios'
 import { UpdateTodoRequest } from '../types/UpdateTodoRequest';
 
-export async function getTodos(idToken: string): Promise<Todo[]> {
-  console.log('Fetching todos')
+export async function getTodos(): Promise<SurveyResult> {
+  console.log('Fetching survey')
 
-  const response = await Axios.get(`${apiEndpoint}/todos`, {
+  const response = await Axios.get(`${apiEndpoint}/`, {
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`
+      'Content-Type': 'application/json'
     },
   })
-  console.log('Todos:', response.data)
+  console.log('Survey:', response.data)
   return response.data.items
 }
 
 export async function createTodo(
   idToken: string,
   newTodo: CreateTodoRequest
-): Promise<Todo> {
-  const response = await Axios.post(`${apiEndpoint}/todos`,  JSON.stringify(newTodo), {
+): Promise<SurveyResult> {
+  const response = await Axios.post(`${apiEndpoint}/`,  JSON.stringify(newTodo), {
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`
+      'Content-Type': 'application/json'
     }
   })
   console.log('response from create:'+response)
