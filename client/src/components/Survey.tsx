@@ -15,7 +15,7 @@ import {
   Header,
   Icon,
   Input,
-  Image, Label,
+  Image, Label,Statistic,Message,
   Loader
 } from 'semantic-ui-react'
 
@@ -37,10 +37,10 @@ interface SurveyState {
 
 export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
   state: SurveyState = {
-    survey: { yes: '0', no: '0', maybe: '0', ipAddr: '', vote:'',when:''  },
+    survey: { yes: '0', no: '0', maybe: '0', ipAddr: '', vote: '', when: '' },
     loadingSurvey: true
   }
- 
+
 
 
   async componentDidMount() {
@@ -56,13 +56,13 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
   }
 
   onSurveyPost = async (surveyIndex: string) => {
-     
+
     try {
       const surveyResult = await surveyPost(surveyIndex)
       await this.setState({
-        survey: { yes: surveyResult.yes, no: surveyResult.no, maybe: surveyResult.maybe, ipAddr: surveyResult.ipAddr, vote:surveyResult.vote,when:surveyResult.when  },
+        survey: { yes: surveyResult.yes, no: surveyResult.no, maybe: surveyResult.maybe, ipAddr: surveyResult.ipAddr, vote: surveyResult.vote, when: surveyResult.when },
         loadingSurvey: false
-      } )
+      })
       console.log(this.state.survey);
     } catch {
       alert('Post survey failed')
@@ -70,48 +70,20 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
   }
 
   render() {
+    let history = undefined
+    if(this.state.survey.ipAddr){
+      history = this.renderSurveyHistory()
+    }
     return (
       <div>
         <Header as="h1">Can social distancing flatten the curve?</Header>
 
         {this.renderSurveyInput()}
-
+        {history}
         {this.renderResult()}
 
 
       </div>
-    )
-  }
-
-  renderSurveyInput() {
-    return (
-      <Grid padded>
-        <Grid.Row>
-
-          <Button
-            size="large"
-            color="teal"
-            onClick={() => this.onSurveyPost('YES_INDEX')}
-          >Yes
-                  </Button>
-
-          <Button
-            size="large"
-            color="yellow"
-            onClick={() => this.onSurveyPost('MAYBE_INDEX')}
-          >Not Sure
-                  </Button>
-          <Button
-            size="large"
-            color="red"
-            onClick={() => this.onSurveyPost('NO_INDEX')}
-          >No
-                  </Button>
-          <Grid.Column width={16}>
-            <Divider />
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
     )
   }
 
@@ -122,6 +94,69 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
 
     return this.renderChart()
   }
+
+  renderSurveyHistory() {
+    let voted = "No" 
+    if(this.state.survey.vote==='YES_INDEX'){
+      voted="Yes"
+    }else if(this.state.survey.vote==='MAYBE_INDEX'){
+      voted="Not sure"
+    } 
+    return (
+      <Grid padded>
+        <Grid.Row><Grid.Column width={16} centered> 
+        <Message  >
+    <Message.Header>Welcome back! Changed your mind?</Message.Header>
+    <p>
+      You had last voted '{voted}' on {this.state.survey.when}, using IP address {this.state.survey.ipAddr}. </p>
+      <p> You can change your vote if you wish. </p>
+  </Message>
+          </Grid.Column></Grid.Row>
+          <Grid.Column width={16}>
+            <Divider />
+          </Grid.Column>
+      </Grid>
+    )
+  }
+
+  renderSurveyInput() {
+    return (
+      <Grid padded>
+        <Grid.Row>
+        <Grid.Column width={16} centered>
+          <Button as='div' labelPosition='right'
+          onClick={() => this.onSurveyPost('YES_INDEX')}>
+            <Button color='teal'>
+              <Icon name='checkmark' />Yes
+            </Button>
+            <Label as='a' basic color='teal' pointing='left'>
+            {this.state.survey.yes}
+            </Label>
+          </Button>
+          <Button as='div' labelPosition='right'
+          onClick={() => this.onSurveyPost('MAYBE_INDEX')}>
+            <Button color='yellow'>
+              <Icon name='help' />Not sure
+            </Button>
+            <Label as='a' basic color='yellow' pointing='left'>
+            {this.state.survey.maybe}
+            </Label>
+          </Button>
+          <Button as='div' labelPosition='right'
+          onClick={() => this.onSurveyPost('NO_INDEX')}>
+            <Button color='red'>
+              <Icon name='ban' />No
+            </Button>
+            <Label as='a' basic color='red' pointing='left'>
+            {this.state.survey.no}
+            </Label>
+          </Button>
+          </Grid.Column> 
+        </Grid.Row>
+      </Grid>
+    )
+  }
+
 
   renderLoading() {
     return (
@@ -150,11 +185,11 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
       <Grid columns='equal'>
         <Grid.Row>
           <Grid.Column centered>
-            <PieChart width={350} height={350}>
+            <PieChart width={390} height={350}>
               <Pie
                 data={data}
-                cx={180}
-                cy={180}
+                cx={210}
+                cy={150}
                 labelLine={false}
                 outerRadius={150}
 
@@ -165,57 +200,33 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
                   data.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
                 }
               </Pie>
-            </PieChart></Grid.Column>
-          <Grid.Column centered  >
-            <Grid  >
-              <Grid.Row>
-                <Grid.Column width={5} centered textAlign='center'>
-                </Grid.Column>
-                <Grid.Column width={3} floated="right" color='teal' key='teal' textAlign='center'>
-                  Yes
-                </Grid.Column>
-                <Grid.Column width={3} floated="right" color='yellow' key='yellow' textAlign='center'>
-                  Not sure
-                </Grid.Column>
-                <Grid.Column width={3} floated="right" color='red' key='red' textAlign='center'>
-                  No
-                </Grid.Column> 
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column width={5} centered textAlign='right'>
-                  <Label pointing='right' size="large">  Total    </Label>
-                </Grid.Column>
-                <Grid.Column    width={3} floated="right" textAlign='center'>
-                  {this.state.survey.yes}
-                </Grid.Column>
-                <Grid.Column width={3} floated="right" textAlign='center'>
-                  {this.state.survey.maybe}
-                </Grid.Column>
-                <Grid.Column width={3} floated="right" textAlign='center'>
-                  {this.state.survey.no}
-                </Grid.Column>
+            </PieChart></Grid.Column> 
+          <Grid.Column centered>
+            <Grid.Row centered> 
+             
+              
+              <Statistic size='tiny'>
+              <Statistic.Value>{yesPercent}</Statistic.Value>
+              <Statistic.Label>Yes %</Statistic.Label>
+              </Statistic>
 
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column width={5} centered textAlign='right'>
-                  <Label pointing='right' size="large">Percentage</Label>
-                </Grid.Column>
-                <Grid.Column width={3} floated="right" textAlign='center'>
-                  {yesPercent}%
-                </Grid.Column>
-                <Grid.Column width={3} floated="right" textAlign='center'>
-                  {maybePercent}%
-                </Grid.Column>
-                <Grid.Column width={3} floated="right" textAlign='center'>
-                  {noPercent}%
-                </Grid.Column> 
-              </Grid.Row>  <Divider />
-              <Grid.Row>
-                <Grid.Column width={16} centered textAlign='left'>
-                    Total votes : {totalVotes} 
-                </Grid.Column>
-              </Grid.Row>
-            </Grid></Grid.Column>
+              <Statistic size='tiny'>
+              <Statistic.Value>{maybePercent}</Statistic.Value>
+              <Statistic.Label>Not Sure %</Statistic.Label>
+              </Statistic>
+
+              <Statistic size='tiny'>
+              <Statistic.Value>{noPercent}</Statistic.Value>
+              <Statistic.Label>No %</Statistic.Label>
+              </Statistic>
+            </Grid.Row> 
+            <Grid.Row centered>
+            <Statistic  centered>
+              <Statistic.Value>{totalVotes}</Statistic.Value>
+              <Statistic.Label>Votes</Statistic.Label>
+              </Statistic>
+            </Grid.Row>
+            </Grid.Column>
         </Grid.Row>
         <Grid.Row>
           <Grid.Column width={16}>
@@ -225,31 +236,7 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
       </Grid>
     );
 
-  }
-
-  renderSurveyResult() {
-    return (
-      <Grid padded>
-
-        <Grid.Row>
-          <Grid.Column width={3} floated="right">
-            Yes : {this.state.survey.yes}
-          </Grid.Column>
-          <Grid.Column width={3} floated="right">
-            Maybe : {this.state.survey.maybe}
-          </Grid.Column>
-          <Grid.Column width={3} floated="right">
-            No : {this.state.survey.no}
-          </Grid.Column>
-
-          <Grid.Column width={16}>
-            <Divider />
-          </Grid.Column>
-        </Grid.Row>
-
-      </Grid>
-    )
-  }
+  } 
 
   calculateDueDate(): string {
     const date = new Date()

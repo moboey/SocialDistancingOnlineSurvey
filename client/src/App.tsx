@@ -23,11 +23,11 @@ export default class App extends Component<AppProps, AppState> {
  
   render() {
     return (
-      <div>
-        <Segment style={{ padding: '8em 0em' }} vertical>
-          <Grid container stackable verticalAlign="middle">
+      <div>          
+        <Segment style={{ padding: '5em 5em' }}  >
+          <Grid container centered verticalAlign="middle">
             <Grid.Row>
-              <Grid.Column width={16}>
+              <Grid.Column width={16} centered>
                 <Router history={this.props.history}> 
                   {this.generateCurrentPage()}
                 </Router>
@@ -40,7 +40,6 @@ export default class App extends Component<AppProps, AppState> {
   }
  
   generateCurrentPage() { 
-
     return (
       
       <Switch>

@@ -6,17 +6,21 @@ const surveyAccess = new SurveyAccess()
 const logger = createLogger('businesslogic')
 
 export async function getSurveyResult(ipAddr): Promise<SurveyResult> {
-    logger.info('Getting survey')
+    
     logger.info('Getting survey result')
     const yesTotal = await surveyAccess.getSurveyResultByIndex(process.env.SURVEY_YES_INDEX)
     const noTotal = await surveyAccess.getSurveyResultByIndex(process.env.SURVEY_NO_INDEX)
     const maybeTotal = await surveyAccess.getSurveyResultByIndex(process.env.SURVEY_MAYBE_INDEX)
     const oldVote = await surveyAccess.getVoteByIP(ipAddr)    
-    let surveyResult = { yes: yesTotal, no: noTotal, maybe: maybeTotal, ipAddr:ipAddr } as SurveyResult    
+    let surveyResult = { yes: yesTotal, no: noTotal, maybe: maybeTotal } as SurveyResult    
     if (oldVote) {
+        logger.info('Voted before')
+        surveyResult.ipAddr = oldVote.ipAddr
         surveyResult.vote = oldVote.vote
         surveyResult.when = oldVote.when
-    } 
+    } else{
+        logger.info('Never voted before')
+    }
     return surveyResult as SurveyResult
 }
 
@@ -51,7 +55,12 @@ export async function updateSurvey(surveyId: string, ipAddr: string): Promise<Su
         //insert new ip vote
         await surveyAccess.insertIpVote(surveyId, ipAddr)
     }
-
     const result = await getSurveyResult(ipAddr);
+    if (!oldVote) {
+        //is a new vote. so remove the ipAddr from the result
+        result.ipAddr=''
+        result.when=''
+        result.vote=''
+    }    
     return result
 }
