@@ -79,9 +79,9 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
         <Header as="h1">Can social distancing flatten the curve?</Header>
 
         {this.renderSurveyInput()}
-        {history}
+        
         {this.renderResult()}
-
+        {history}
 
       </div>
     )
@@ -105,7 +105,7 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
     return (
       <Grid padded>
         <Grid.Row><Grid.Column width={16} centered> 
-        <Message  >
+        <Message size='tiny' >
     <Message.Header>Welcome back! Changed your mind?</Message.Header>
     <p>
       You had last voted '{voted}' on {this.state.survey.when}, using IP address {this.state.survey.ipAddr}. </p>
@@ -124,7 +124,7 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
       <Grid padded>
         <Grid.Row>
         <Grid.Column width={16} centered>
-          <Button as='div' labelPosition='right'
+          <Button as='div' labelPosition='right' size='massive'
           onClick={() => this.onSurveyPost('YES_INDEX')}>
             <Button color='teal'>
               <Icon name='checkmark' />Yes
@@ -133,7 +133,7 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
             {this.state.survey.yes}
             </Label>
           </Button>
-          <Button as='div' labelPosition='right'
+          <Button as='div' labelPosition='right'size='massive'
           onClick={() => this.onSurveyPost('MAYBE_INDEX')}>
             <Button color='yellow'>
               <Icon name='help' />Not sure
@@ -142,7 +142,7 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
             {this.state.survey.maybe}
             </Label>
           </Button>
-          <Button as='div' labelPosition='right'
+          <Button as='div' labelPosition='right'size='massive'
           onClick={() => this.onSurveyPost('NO_INDEX')}>
             <Button color='red'>
               <Icon name='ban' />No
@@ -227,12 +227,7 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
               </Statistic>
             </Grid.Row>
             </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column width={16}>
-            <Divider />
-          </Grid.Column>
-        </Grid.Row>
+        </Grid.Row> 
       </Grid>
     );
 
