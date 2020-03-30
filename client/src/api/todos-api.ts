@@ -16,6 +16,18 @@ export async function getTodos(): Promise<SurveyResult> {
   return response.data.items
 }
 
+
+export async function surveyPost(surveyId: string): Promise<SurveyResult> {
+  console.log('Update survey')
+  const response = await Axios.post(`${apiEndpoint}/${surveyId}`, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  console.log('response from update:'+response.data)
+  return response.data.items
+}
+
 export async function createTodo(
   idToken: string,
   newTodo: CreateTodoRequest
@@ -53,6 +65,8 @@ export async function deleteTodo(
     }
   })
 }
+
+ 
 
 export async function getUploadUrl(
   idToken: string,

@@ -2,8 +2,7 @@ import 'source-map-support/register'
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { SurveyResult } from '../model/SurveyResult'
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-
+import { DocumentClient } from 'aws-sdk/clients/dynamodb' 
 const XAWS = AWSXRay.captureAWS(AWS)
 
 import { createLogger } from '../utils/logger'
@@ -39,27 +38,33 @@ export class SurveyAccess {
     async updateSurveyByIndex(surveyIdValue: string) {
                
         logger.info('Updating index :'+surveyIdValue)
-        const total = await this.getSurveyResultByIndex(surveyIdValue) +1 
+        if(surveyIdValue !== process.env.SURVEY_YES_INDEX && surveyIdValue !== process.env.SURVEY_NO_INDEX && surveyIdValue !== process.env.SURVEY_MAYBE_INDEX )
+        throw new Error(
+            'Invalid survey index type. Should be of either Yes, No or Maybe'
+          )
+
+        const total = await this.getSurveyResultByIndex(surveyIdValue)
+        logger.info('Current total :'+total)
         const params = {
             TableName: process.env.SURVEY_TABLE,
             Key: {
-                surveyId : surveyIdValue 
+                "surveyId": surveyIdValue
             },
             UpdateExpression: "set #count =:a",
             ExpressionAttributeNames: {
-                "#name": "count"
+                "#count": "count"
             },
             ExpressionAttributeValues: {
-                ":a": total 
+                ":a": total + 1
             },
             ReturnValues: "UPDATED_NEW"
         };
         await this.docClient.update(params, function (err, data) {
             if (err) {
-                logger.error("Unable to update", err)
+                logger.error("Unable to update ", err)
                 console.error("Unable to update. Error JSON:", JSON.stringify(err, null, 2));
             } else {
-                logger.info("Update success", data)
+                logger.info("Update success ", data)
                 console.log("Update succeeded:", JSON.stringify(data, null, 2));
             }
         }).promise()

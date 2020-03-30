@@ -2,6 +2,11 @@ import dateFormat from 'dateformat'
 import { History } from 'history'
 import update from 'immutability-helper'
 import * as React from 'react'
+import { PureComponent } from 'react'; 
+import {
+  PieChart, Pie, Sector, Cell,
+} from 'recharts';
+
 import {
   Button,
   Checkbox,
@@ -14,9 +19,26 @@ import {
   Loader
 } from 'semantic-ui-react'
 
-import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
+import { createTodo, deleteTodo, getTodos, surveyPost, patchTodo } from '../api/todos-api'
 import Auth from '../auth/Auth'
 import { SurveyResult } from '../types/Todo'
+
+const COLORS = ['teal', 'orange', 'red'];
+
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({
+  cx, cy, midAngle, innerRadius, outerRadius, percent, index,
+}: {cx : any, cy : any, midAngle:any, innerRadius:any, outerRadius:any, percent:any, index:any,}) => {
+   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
 
 interface TodosProps {
   auth: Auth
@@ -25,19 +47,17 @@ interface TodosProps {
 
 interface TodosState {
   todos: SurveyResult
-  newTodoName: string
   loadingSurvey: boolean
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
-    todos: {yes:'0',no:'0',maybe:'0'},
-    newTodoName: '',
+    todos: {yes:'0',no:'0',maybe:'0'}, 
     loadingSurvey: true
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newTodoName: event.target.value })
+    //this.setState({ newTodoName: event.target.value })
   }
 
   onEditButtonClick = (todoId: string) => {
@@ -49,7 +69,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     try {
       const dueDate = this.calculateDueDate()
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
-        name: this.state.newTodoName,
+        name: '',
         dueDate
       })
       console.log('created Todo:'+newTodo)
@@ -72,6 +92,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       alert('Todo deletion failed')
     }
   }
+
+  
 
   onTodoCheck = async (pos: number) => {
     try {
@@ -103,6 +125,18 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     }
   }
 
+  onSurveyPost = async (surveyIndex: string) => {
+    try {
+      const todos = await surveyPost(surveyIndex) 
+      this.setState({
+        todos,
+        loadingSurvey: false
+      })
+    } catch {
+      alert('Post survey failed')
+    }
+  }
+
   render() {
     return (
       <div>
@@ -111,32 +145,34 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         {this.renderSurveyInput()}
 
         {this.renderTodos()}
+
+        {this.renderChart()}
       </div>
     )
   }
 
   renderSurveyInput() {
-    return (
+    return ( 
       <Grid padded>
       <Grid.Row>
        
         <Button          
           size="large"          
-          color="teal"   block
-          onClick={() => this.onTodoCreate}
+          color="teal"   
+          onClick={() => this.onSurveyPost('YES_INDEX')}
                 >Yes   
                   </Button>  
             
         <Button            
           size="large"                 
-          color="yellow"   block
-          onClick={() => this.onTodoCreate}
+          color="yellow"   
+          onClick={() => this.onSurveyPost('MAYBE_INDEX')}
                 >Maybe   
                   </Button> 
         <Button            
           size="large"                 
-          color="red"   block
-          onClick={() => this.onTodoCreate}
+          color="red"   
+          onClick={() => this.onSurveyPost('NO_INDEX')}
                 >No
                   </Button>     
         <Grid.Column width={16}>
@@ -165,6 +201,44 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     )
   }
 
+  renderChart(){   
+    
+    const data = [
+      { name: 'Yes', value: this.state.todos.yes} ,
+      { name: 'Not sure', value: this.state.todos.maybe },
+      { name: 'No', value: this.state.todos.no },
+    ];
+    
+    return (
+      <Grid padded>
+      <Grid.Row>
+      <Grid.Column >
+      <PieChart width={350} height={350}>
+        <Pie
+          data={data}
+          cx={180}
+          cy={180}
+          labelLine={false}          
+          outerRadius={150}
+          //label={this.renderCustomizedLabel}
+          fill="#8884d8"
+          dataKey="value"
+        >
+          {
+            data.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
+          }
+        </Pie>
+      </PieChart></Grid.Column></Grid.Row>
+      <Grid.Row>
+      <Grid.Column width={16}>
+          <Divider />
+        </Grid.Column>
+      </Grid.Row>
+      </Grid>
+    );
+    
+  }
+
   renderSurveyResult() {
     return (
       <Grid padded>
@@ -174,10 +248,10 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                 Yes : {this.state.todos.yes}
               </Grid.Column>
               <Grid.Column width={3} floated="right">
-                No : {this.state.todos.no}
+                Maybe : {this.state.todos.maybe}
               </Grid.Column>
               <Grid.Column width={3} floated="right">
-                Maybe : {this.state.todos.maybe}
+                No : {this.state.todos.no}
               </Grid.Column>
               
               <Grid.Column width={16}>
