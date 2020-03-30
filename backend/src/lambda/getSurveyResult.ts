@@ -9,8 +9,10 @@ const logger = createLogger('getSurvey')
 export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
   logger.info('Get Survey', event) 
-
-  const survey = await getSurveyResult()
+  const ipAddrArr = event.multiValueHeaders['X-Forwarded-For']
+  const ipAddr = ipAddrArr[0].split(',');
+  logger.info('IP Address: '+ipAddr[0])
+  const survey = await getSurveyResult(ipAddr[0])
   return {
     statusCode: 200,
     body: JSON.stringify({

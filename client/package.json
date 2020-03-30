@@ -1,5 +1,6 @@
 {
   "name": "typescript-app",
+  "homepage":".",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -32,6 +33,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "deploy" : "aws s3 sync build/ s3://socialdistancesurvey --acl public-read",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

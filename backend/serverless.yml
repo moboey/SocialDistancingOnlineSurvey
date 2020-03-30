@@ -20,11 +20,12 @@ provider:
 
   environment:
     SURVEY_INDEX: surveyId
+    IP_INDEX: ipAddr
     SURVEY_YES_INDEX: YES_INDEX
     SURVEY_NO_INDEX: NO_INDEX
     SURVEY_MAYBE_INDEX: MAYBE_INDEX
     SURVEY_TABLE: surveyTotalTable-${self:provider.stage}
-    SURVEY_IP_TABLE: surveyPostIPTable-${self:provider.stage}
+    SURVEY_IP_TABLE: surveyUpdateIPTable-${self:provider.stage}
   
   iamRoleStatements:
     - Effect: Allow
@@ -43,6 +44,7 @@ provider:
       Action:
         - dynamodb:Scan 
         - dynamodb:GetItem 
+        - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:Query
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.SURVEY_IP_TABLE}
@@ -106,14 +108,10 @@ resources:
       Properties:
         AttributeDefinitions:
             - AttributeName: ipAddr
-              AttributeType: S
-            - AttributeName: vote
-              AttributeType: S
+              AttributeType: S 
         KeySchema:
             - AttributeName: ipAddr
-              KeyType: HASH
-            - AttributeName: vote
-              KeyType: RANGE
+              KeyType: HASH 
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.SURVEY_IP_TABLE}
         

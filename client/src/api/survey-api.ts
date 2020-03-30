@@ -1,5 +1,5 @@
 import { apiEndpoint } from '../config'
-import { SurveyResult } from '../types/Todo';
+import { SurveyResult } from '../types/Survey';
 import { CreateTodoRequest } from '../types/CreateTodoRequest';
 import Axios from 'axios'
 import { UpdateTodoRequest } from '../types/UpdateTodoRequest';

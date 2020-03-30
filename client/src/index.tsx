@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom'
 import './index.css'
 import * as serviceWorker from './serviceWorker'
 import 'semantic-ui-css/semantic.min.css'
-import { makeAuthRouting } from './routing';
-
-ReactDOM.render(makeAuthRouting(), document.getElementById('root'))
+//import { makeAuthRouting } from './routing';
+import App from './App'
+import { makeRouting } from './routing';
+ReactDOM.render(makeRouting(), document.getElementById('root'))
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

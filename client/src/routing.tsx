@@ -15,6 +15,21 @@ const handleAuthentication = (props: any) => {
   }
 }
 
+export const makeRouting = () => {
+  return (
+    <Router history={history}>
+      <div>
+        
+        <Route
+          render={props => {
+            return <App auth={auth} {...props} />
+          }}
+        />
+      </div>
+    </Router>
+  )
+}
+
 export const makeAuthRouting = () => {
   return (
     <Router history={history}>
