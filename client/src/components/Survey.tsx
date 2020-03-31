@@ -25,7 +25,7 @@ interface SurveyState {
 
 export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
   state: SurveyState = {
-    survey: { yes: '0', no: '0', maybe: '0', ipAddr: '', vote: '', when: '' },
+    survey: { yes: '0', no: '0', maybe: '0', ipAddr: '', vote: '', when: '', total:0 },
     loadingSurvey: true
   }
 
@@ -77,7 +77,9 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
     try {
       const surveyResult = await surveyPost(surveyIndex)
       await this.setState({
-        survey: { yes: surveyResult.yes, no: surveyResult.no, maybe: surveyResult.maybe, ipAddr: surveyResult.ipAddr, vote: surveyResult.vote, when: surveyResult.when },
+        survey: { yes: surveyResult.yes, no: surveyResult.no, 
+          maybe: surveyResult.maybe, ipAddr: surveyResult.ipAddr,
+           vote: surveyResult.vote, when: surveyResult.when, total:surveyResult.total},
         loadingSurvey: false
       })
       console.log(this.state.survey);
@@ -100,6 +102,8 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
     } else if (this.state.survey.vote === 'MAYBE_INDEX') {
       voted = "Maybe"
     }
+    let time = 'time'
+    if(this.state.survey.total>1)time ='times'
     return (
       <Segment textAlign='center' basic  >
         <Message size='tiny'  >
@@ -107,7 +111,7 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
           <Message.Content size='tiny'>
             <p></p><p>
               You had last voted '{voted}' on {this.state.survey.when}. </p>
-            <p> Your IP address is {this.state.survey.ipAddr}.
+            <p> Your IP address is {this.state.survey.ipAddr}. You have voted {this.state.survey.total} {time}.
           You can change your vote if you wish. </p></Message.Content>
         </Message></Segment>
     )

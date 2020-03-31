@@ -32,20 +32,22 @@ export class SurveyAccess {
         return total 
     }
 
-    async getVoteByIP(ipAddr : string): Promise<IPResult> {
+    async getLatestVoteByIP(ipAddr : string): Promise<IPResult> {
         const result = await this.docClient.query({
             TableName: this.ipTable,
             KeyConditionExpression: this.ipIndex+'= :id',
             ExpressionAttributeValues: {
                 ':id': ipAddr
-            }
+            },
+            ScanIndexForward: false
         }).promise() 
         if (result.Items.length == 0){
             return undefined;
         }      
         const vote = result.Items[0].vote;     
-        const when = result.Items[0].when;    
-        let ipResult = {ipAddr:ipAddr, vote:vote, when: when }   
+        const when = result.Items[0].when; 
+        const size = result.Count;
+        let ipResult = {ipAddr:ipAddr, vote:vote, when: when, total: size }   
         return ipResult as IPResult
     }
 

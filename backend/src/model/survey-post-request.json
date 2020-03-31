@@ -3,12 +3,17 @@
   "title": "survey",
   "type": "object",
   "properties": {
-    "option": {
-      "type": "string"
+    "surveyId": {
+      "type": "string",
+      "enum": [
+        "YES_INDEX",
+        "NO_INDEX",
+        "MAYBE_INDEX"
+      ]
     }
   },
   "required": [
-    "option"
+    "surveyId"
   ],
   "additionalProperties": false
 }

@@ -21,11 +21,12 @@ provider:
   environment:
     SURVEY_INDEX: surveyId
     IP_INDEX: ipAddr
+    IP_WHEN_INDEX: when
     SURVEY_YES_INDEX: YES_INDEX
     SURVEY_NO_INDEX: NO_INDEX
     SURVEY_MAYBE_INDEX: MAYBE_INDEX
     SURVEY_TABLE: surveyTotalTable-${self:provider.stage}
-    SURVEY_IP_TABLE: surveyUpdateIPTable-${self:provider.stage}
+    SURVEY_IP_TABLE: surveyUpdatesIPTable-${self:provider.stage}
   
   iamRoleStatements:
     - Effect: Allow
@@ -49,18 +50,7 @@ provider:
         - dynamodb:Query
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.SURVEY_IP_TABLE}
     
-
-custom:  
-  documentation:
-  api:
-      info:
-      version: v1.0.0
-      title: SURVEY API
-      description: Serverless application for online survey on social distancing
-  models:      
-      - name: SurveyPost
-        contentType: application/json
-        schema: ${file(src/model/survey-post-request.json)}
+ 
 
 functions:  
 
@@ -79,6 +69,24 @@ functions:
           method: post 
           path: survey/{surveyId}
           cors: true 
+          reqValidatorName: RequestBodyValidator  
+          requestModels:
+            'application/json': TodoCreate
+          request: 
+            schema:
+              application/json: ${file(src/model/survey-post-request.json)} 
+
+custom:  
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Survey API
+        description: Online survey for social distancing
+    models:      
+      - name: surveyUpdate
+        contentType: application/json
+        schema: ${file(src/model/survey-post-request.json)}
 
 resources:
   Resources: 
@@ -109,9 +117,13 @@ resources:
         AttributeDefinitions:
             - AttributeName: ipAddr
               AttributeType: S 
+            - AttributeName: when
+              AttributeType: S 
         KeySchema:
             - AttributeName: ipAddr
               KeyType: HASH 
+            - AttributeName: when
+              KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.SURVEY_IP_TABLE}
         
@@ -121,6 +133,6 @@ resources:
           Name: 'request-body-validator'
           RestApiId:
               Ref: ApiGatewayRestApi
-          ValidateRequestBody: true
-          ValidateRequestParameters: false
+          ValidateRequestBody: false
+          ValidateRequestParameters: true  
   

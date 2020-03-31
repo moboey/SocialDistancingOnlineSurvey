@@ -11,13 +11,14 @@ export async function getSurveyResult(ipAddr): Promise<SurveyResult> {
     const yesTotal = await surveyAccess.getSurveyResultByIndex(process.env.SURVEY_YES_INDEX)
     const noTotal = await surveyAccess.getSurveyResultByIndex(process.env.SURVEY_NO_INDEX)
     const maybeTotal = await surveyAccess.getSurveyResultByIndex(process.env.SURVEY_MAYBE_INDEX)
-    const oldVote = await surveyAccess.getVoteByIP(ipAddr)    
+    const oldVote = await surveyAccess.getLatestVoteByIP(ipAddr)    
     let surveyResult = { yes: yesTotal, no: noTotal, maybe: maybeTotal } as SurveyResult    
     if (oldVote) {
         logger.info('Voted before')
         surveyResult.ipAddr = oldVote.ipAddr
         surveyResult.vote = oldVote.vote
         surveyResult.when = oldVote.when
+        surveyResult.total = oldVote.total
     } else{
         logger.info('Never voted before')
     }
@@ -31,7 +32,7 @@ export async function updateSurvey(surveyId: string, ipAddr: string): Promise<Su
             'Invalid survey index type. Should be of either Yes, No or Maybe'
         )
 
-    const oldVote = await surveyAccess.getVoteByIP(ipAddr)
+    const oldVote = await surveyAccess.getLatestVoteByIP(ipAddr)
     if (oldVote) {
         logger.info('Found existing voter :'+oldVote)
         //existing voter. check if voter has changed vote
@@ -45,22 +46,21 @@ export async function updateSurvey(surveyId: string, ipAddr: string): Promise<Su
             await surveyAccess.updateSurveyByIndex(oldVote.vote, -1)
             //increment new vote
             await surveyAccess.updateSurveyByIndex(surveyId, 1)
-            //update ip to new vote
-            await surveyAccess.updateIpVote(surveyId, ipAddr)
+            //log vote change
+            await surveyAccess.insertIpVote(surveyId, ipAddr)
         }
     } else {
         //new voter
         logger.info(' Detected a new voter ')
         await surveyAccess.updateSurveyByIndex(surveyId, 1)
-        //insert new ip vote
+        //log vote 
         await surveyAccess.insertIpVote(surveyId, ipAddr)
     }
     const result = await getSurveyResult(ipAddr);
     if (!oldVote) {
         //is a new vote. so remove the ipAddr from the result
         result.ipAddr=''
-        result.when=''
-        result.vote=''
+        result.when='' 
     }    
     return result
 }

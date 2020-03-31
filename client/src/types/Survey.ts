@@ -5,4 +5,5 @@ export interface SurveyResult {
   ipAddr:string
   vote: string
   when :string
+  total :number
 }
