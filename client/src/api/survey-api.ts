@@ -4,7 +4,7 @@ import { CreateTodoRequest } from '../types/CreateTodoRequest';
 import Axios from 'axios'
 import { UpdateTodoRequest } from '../types/UpdateTodoRequest';
 
-export async function getTodos(): Promise<SurveyResult> {
+export async function getSurvey(): Promise<SurveyResult> {
   console.log('Fetching survey')
 
   const response = await Axios.get(`${apiEndpoint}/`, {
