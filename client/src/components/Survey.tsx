@@ -198,7 +198,7 @@ export class Survey extends React.PureComponent<SurveyProps, SurveyState> {
               <Statistic.Label>Total</Statistic.Label>
             </Statistic>
           </Grid.Column> </Grid>
-      </Segment>
+      </Segment>    
     )
   }
 

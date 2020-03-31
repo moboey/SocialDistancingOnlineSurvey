@@ -12,7 +12,7 @@ The application also logs every vote change for that Ip address as logs and disp
 # Backend code structure
 The request from API gateway is processed by codes in the src/lambda folder. Business logic codes are placed in the src/businesslogic folder. Persistence logic is stored in the src/datalayer folder. Models can be found in the src/model folder.
 Infrastructure configurations can be found in the serverless.yml file. 
-
+  
 # Deploying the application
 ## Backend
 
